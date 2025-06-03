@@ -1,6 +1,7 @@
 import re
 import pickle 
 import os
+import spacy
 
 def normalize_text(text):
     """Lowercase and strip whitespace."""
@@ -46,3 +47,20 @@ def load_dataset_structure(dataset_path, splits, modes, types):
         if os.path.exists(metadata_file):
             data[split]['meta'] = load_pickle(metadata_file)
     return data
+
+import spacy
+
+def tag_sentences_with_spacy(sentences, lang="en"):
+    """
+    Tokenize and POS-tag a list of sentences using spaCy.
+
+    Parameters:
+    - sentences: list of strings
+    - lang: 'en' for English (default), 'nl' for Dutch
+
+    Returns:
+    - list of lists with (token, POS) tuples
+    """
+    model = "en_core_web_sm" if lang == "en" else "nl_core_news_sm"
+    nlp = spacy.load(model)
+    return [[(token.text, token.pos_) for token in doc] for doc in nlp.pipe(sentences)]
