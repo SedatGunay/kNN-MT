@@ -18,6 +18,17 @@ def filter_tokens_by_pos(tokens, pos_labels):
 def load_pickle(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
+    
+def write_texts_to_txt(texts, path):
+    """
+    Writes a list of sentences to a .txt file, one sentence per line.
+        
+    Parameters:
+    texts (List[str]): The sentences to write.
+    path(str): Target path for the .txt file.
+    """
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(texts) + "\n")
 
 def load_dataset_structure(dataset_path, splits, modes, types):
     """
