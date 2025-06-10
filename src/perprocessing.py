@@ -2,6 +2,7 @@ import re
 import pickle 
 import os
 import spacy
+from collections import Counter
 
 def normalize_text(text):
     """Lowercase and strip whitespace."""
@@ -59,8 +60,6 @@ def load_dataset_structure(dataset_path, splits, modes, types):
             data[split]['meta'] = load_pickle(metadata_file)
     return data
 
-import spacy
-
 def tag_sentences_with_spacy(sentences, lang="en"):
     """
     Tokenize and POS-tag a list of sentences using spaCy.
@@ -75,3 +74,32 @@ def tag_sentences_with_spacy(sentences, lang="en"):
     model = "en_core_web_sm" if lang == "en" else "nl_core_news_sm"
     nlp = spacy.load(model)
     return [[(token.text, token.pos_) for token in doc] for doc in nlp.pipe(sentences)]
+
+def clean_token(token):
+    """Removes punctuation from beginning and end of a word
+    - used to make counts files for compare-mt analysis
+    """
+    return re.sub(r"^\W+|\W+$", "", token)
+
+def create_counts_from_txt(txt_path, counts_path):
+    """
+    Creates a .counts file from a .txt file by counting normalized word frequencies.
+    
+    Parameters:
+    txt_path (str): Path to the input .txt file.
+    counts_path (str): Path to the output .counts file.
+    """
+    with open(txt_path, "r", encoding="utf-8") as f:
+        words = f.read().split()
+
+    cleaned_words = []
+    for word in words:
+        token = clean_token(word).lower()
+        if token:
+            cleaned_words.append(token)
+
+    counts = Counter(cleaned_words)
+
+    with open(counts_path, "w", encoding="utf-8") as f:
+        for word, count in counts.items():
+            f.write(f"{word}\t{count}\n")
