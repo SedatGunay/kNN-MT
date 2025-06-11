@@ -103,3 +103,24 @@ def create_counts_from_txt(txt_path, counts_path):
     with open(counts_path, "w", encoding="utf-8") as f:
         for word, count in counts.items():
             f.write(f"{word}\t{count}\n")
+
+def generate_pos_tags(input_txt_path, output_tags_path, lang="en"):
+    """
+   Generates POS tags per token from a .txt file and writes them to a .tags file.
+    
+    Parameters:
+    input_txt_path (str): Path to .txt file with 1 sentence per line.
+    output_tags_path (str): Path to save .tags file.
+    lang (str): 'en' or 'nl' for the language of the spaCy model.
+    """
+    model = "en_core_web_sm" if lang == "en" else "nl_core_news_sm"
+    nlp = spacy.load(model)
+
+    with open(input_txt_path, "r", encoding="utf-8") as f_in, \
+         open(output_tags_path, "w", encoding="utf-8") as f_out:
+        for line in f_in:
+            doc = nlp(line.strip())
+            tags = [token.pos_ for token in doc]
+            f_out.write(" ".join(tags) + "\n")
+
+    print(f"Tags saved in: {output_tags_path}")
