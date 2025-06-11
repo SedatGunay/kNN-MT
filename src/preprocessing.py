@@ -104,79 +104,71 @@ def create_counts_from_txt(txt_path, counts_path):
         for word, count in counts.items():
             f.write(f"{word}\t{count}\n")
 
-def generate_pos_tags(input_txt_path, output_tags_path, lang="en"):
-    """
-   Generates POS tags per token from a .txt file and writes them to a .tags file.
-    
+def pos_tag_aligned(input_txt_path, output_tag_path, lang="nl"):
+    """  
+    Performs POS tagging on a file where each line is already tokenised
+     (one word per space). Stores POS tags per line in a .tag file.
+    Skips and reports lines with mismatches.
+
     Parameters:
-    input_txt_path (str): Path to .txt file with 1 sentence per line.
-    output_tags_path (str): Path to save .tags file.
-    lang (str): 'en' or 'nl' for the language of the spaCy model.
+    - input_txt_path (str): Path to .txt file containing sentences (split into tokens).
+    - output_tag_path (str): Path to output file (.tag) in which POS tags are written.
+    - lang (str): “nl” for Dutch, “en” for English (defines spaCy model).
+
     """
-    model = "en_core_web_sm" if lang == "en" else "nl_core_news_sm"
+    model = "nl_core_news_sm" if lang == "nl" else "en_core_web_sm"
     nlp = spacy.load(model)
 
     with open(input_txt_path, "r", encoding="utf-8") as f_in, \
-         open(output_tags_path, "w", encoding="utf-8") as f_out:
-        for line in f_in:
-            doc = nlp(line.strip())
-            tags = [token.pos_ for token in doc]
-            f_out.write(" ".join(tags) + "\n")
+         open(output_tag_path, "w", encoding="utf-8") as f_out:
 
-    print(f"Tags saved in: {output_tags_path}")
+        for idx, line in enumerate(f_in):
+            tokens = line.strip().split()
+            doc = spacy.tokens.Doc(nlp.vocab, words=tokens)
+            for pipe in nlp.pipeline:
+                if pipe[0] != "ner":  
+                    doc = pipe[1](doc)
 
+            if len(doc) != len(tokens):
+                print(f"Mismatch in line {idx+1}: {len(tokens)} tokens vs {len(doc)} tags")
+                print("TXT:", " ".join(tokens))
+                print("TAG:", " ".join([t.pos_ for t in doc]))
+                continue  #skip line
 
+            f_out.write(" ".join([t.pos_ for t in doc]) + "\n")
 
-if __name__ == "__main__":
-    # generate_pos_tags(
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_ref_texts.txt",
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_ref_texts.tag",
-    #     lang="nl"
-    # )
+    print(f"Tags saved in: {output_tag_path}")
 
-    # generate_pos_tags(
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_van_texts.txt",
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_van_texts.tag",
-    #     lang="nl"
-    # )
+def check_token_tag_alignment(txt_path, tag_path):
+    """
+    Checks whether each line in a text file has the same number of tokens
+    as the corresponding line in a tag file. Reports the first mismatch.
 
-    # generate_pos_tags(
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_knn_texts.txt",
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_knn_texts.tag",
-    #     lang="nl"
-    # )
+    Parameters:
+    - txt_path (str): Path to file containing sentences (one sentence per line).
+    - tag_path (str): Path to file containing POS tags (one line of tags per sentence).
+    """
+    with open(txt_path, "r", encoding="utf-8") as f_txt, open(tag_path, "r", encoding="utf-8") as f_tag:
+        for i, (txt_line, tag_line) in enumerate(zip(f_txt, f_tag)):
+            txt_tokens = txt_line.strip().split()
+            tag_tokens = tag_line.strip().split()
+            if len(txt_tokens) != len(tag_tokens):
+                print(f" Mismatch in line {i+1}: {len(txt_tokens)} tokens vs {len(tag_tokens)} tags")
+                print("TXT:", txt_line.strip())
+                print("TAG:", tag_line.strip())
+                return
+    print("All lines have matching token–tag length.")
 
-    # generate_pos_tags(
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_ref_texts.txt",
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_ref_texts.tag",
-    #     lang="en"
-    # )
+def find_empty_or_whitespace_lines(*filepaths):
+    """
+     Checks one or more text files for empty lines or lines consisting only of spaces.
+    Prints a warning for each file with the line number where such a line occurs.
 
-    # generate_pos_tags(
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_van_texts.txt",
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_van_texts.tag",
-    #     lang="en"
-    # )
-
-    # generate_pos_tags(
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_knn_texts.txt",
-    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_knn_texts.tag",
-    #     lang="en"
-    # )
-    generate_pos_tags(
-        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_ref.txt",
-        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_ref.tag",
-        lang="en"
-    )
-
-    generate_pos_tags(
-        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_van.txt",
-        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_van.tag",
-        lang="en"
-    )
-
-    generate_pos_tags(
-        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_knn.txt",
-        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_knn.tag",
-        lang="en"
-    )
+    Parameters:
+    - *filepaths (str): One or more path names to .txt files.
+    """
+    for path in filepaths:
+        with open(path, "r", encoding="utf-8") as f:
+            for idx, line in enumerate(f, 1):
+                if not line.strip():
+                    print(f"empty line in {path} at line {idx}")
