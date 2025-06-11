@@ -124,3 +124,59 @@ def generate_pos_tags(input_txt_path, output_tags_path, lang="en"):
             f_out.write(" ".join(tags) + "\n")
 
     print(f"Tags saved in: {output_tags_path}")
+
+
+
+if __name__ == "__main__":
+    # generate_pos_tags(
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_ref_texts.txt",
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_ref_texts.tag",
+    #     lang="nl"
+    # )
+
+    # generate_pos_tags(
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_van_texts.txt",
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_van_texts.tag",
+    #     lang="nl"
+    # )
+
+    # generate_pos_tags(
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_knn_texts.txt",
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/commonvoice/common_test_knn_texts.tag",
+    #     lang="nl"
+    # )
+
+    # generate_pos_tags(
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_ref_texts.txt",
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_ref_texts.tag",
+    #     lang="en"
+    # )
+
+    # generate_pos_tags(
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_van_texts.txt",
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_van_texts.tag",
+    #     lang="en"
+    # )
+
+    # generate_pos_tags(
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_knn_texts.txt",
+    #     "/Users/sedatgunay/Desktop/compare-mt-2/librispeech/libri_test_knn_texts.tag",
+    #     lang="en"
+    # )
+    generate_pos_tags(
+        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_ref.txt",
+        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_ref.tag",
+        lang="en"
+    )
+
+    generate_pos_tags(
+        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_van.txt",
+        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_van.tag",
+        lang="en"
+    )
+
+    generate_pos_tags(
+        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_knn.txt",
+        "/Users/sedatgunay/Desktop/compare-mt-2/voxpopuli/vox_test_knn.tag",
+        lang="en"
+    )
