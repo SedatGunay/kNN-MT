@@ -1,5 +1,5 @@
 from collections import Counter
-from jiwer import compute_measures
+# from jiwer import compute_measures
 import pandas as pd
 import re
 import os
@@ -87,3 +87,57 @@ def extract_pos_tag_scores(index_html_path):
 
   
     return df_pos
+
+
+def extract_freq_bucket_scores(index_html_path):
+    """
+    Extracts word accuracy (F1) scores by frequency bucket for vanilla and kNN-MT systems.
+
+    Parameters:
+    - index_html_path (str): Path to the compare-mt `index.html` file.
+
+    Returns:
+    - pd.DataFrame: DataFrame with frequency buckets, system scores, and differences.
+    """
+    with open(index_html_path, "r", encoding="utf-8") as f:
+        soup = BeautifulSoup(f, "html.parser")
+
+    # Vind de juiste tabel via caption
+    freq_table = None
+    for table in soup.find_all("table"):
+        caption = table.find("caption")
+        if caption and "word fmeas by frequency bucket" in caption.text.lower():
+            freq_table = table
+            break
+
+    if freq_table is None:
+        raise ValueError("Frequentie-tabel niet gevonden in het HTML-bestand.")
+
+    # Extractie helper
+    def extract_float(td):
+        match = re.search(r"\d+\.\d+", td.get_text(strip=True))
+        return float(match.group()) if match else None
+
+    # Gegevens verzamelen
+    buckets, sys1_scores, sys2_scores = [], [], []
+
+    for row in freq_table.find_all("tr")[1:]:  # Skip header
+        cols = row.find_all("td")
+        bucket = row.find("th").get_text(strip=True) if row.find("th") else None
+        if bucket and len(cols) >= 2:
+            val1 = extract_float(cols[0])  # kNN-MT
+            val2 = extract_float(cols[1])  # Vanilla
+            if val1 is not None and val2 is not None:
+                buckets.append(bucket)
+                sys1_scores.append(val1)
+                sys2_scores.append(val2)
+
+    # DataFrame bouwen
+    df_freq = pd.DataFrame({
+        "Frequentie Bucket": buckets,
+        "kNN-MT (sys1)": sys1_scores,
+        "Vanilla (sys2)": sys2_scores
+    })
+    df_freq["Verschil (sys1 - sys2)"] = df_freq["kNN-MT (sys1)"] - df_freq["Vanilla (sys2)"]
+
+    return df_freq
