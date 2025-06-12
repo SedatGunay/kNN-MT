@@ -5,6 +5,7 @@ import re
 import os
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
+from sacrebleu import sentence_bleu
 
 def compute_pos_distribution(tokenized_sentences):
     """Compute frequency distribution of POS tags."""
@@ -150,3 +151,64 @@ def extract_freq_bucket_scores(index_html_path):
     plt.show()
 
     return df_freq
+
+def load_file(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return [line.strip() for line in f if line.strip()]
+
+def bleu_per_sentence(refs, hyps):
+    """
+    Calculates sentence-level BLEU scores for each hypothesis–reference pair.
+    """
+    return [sentence_bleu(hyp, [ref]).score for ref, hyp in zip(refs, hyps)]
+
+def get_bleu_buckets(scores, edges):
+    """
+    Groups BLEU scores into buckets based on given boundaries.
+
+    Parameters:
+    - scores (List[float]): List of BLEU scores.
+    - edges (List[float]): Bucket boundaries
+    """
+    buckets = {}
+    edges = [0.0] + edges + [100.0]
+    for low, high in zip(edges[:-1], edges[1:]):
+        label = f"[{low},{high})" if high < 100 else f">={low}"
+        buckets[label] = []
+
+    for score in scores:
+        for low, high in zip(edges[:-1], edges[1:]):
+            if low <= score < high:
+                label = f"[{low},{high})" if high < 100 else f">={low}"
+                buckets[label].append(score)
+                break
+
+    return buckets
+
+def compare_bleu_buckets(refs, sys1, sys2, bucket_edges):
+    """
+    Compares the distribution of BLEU scores across buckets for two systems.
+
+    Parameters:
+    - refs (List[str]): Reference sentences.
+    - sys1 (List[str]): Hypothesis sentences from system 1 (kNN-MT).
+    - sys2 (List[str]): Hypothesis sentences from system 2 (vanilla MT).
+    - bucket_edges (List[float]): BLEU score bucket edges.
+
+    Returns:
+    - pd.DataFrame: DataFrame with bucket label, counts per system, and difference.
+    """
+    scores1 = bleu_per_sentence(refs, sys1)
+    scores2 = bleu_per_sentence(refs, sys2)
+
+    buckets1 = get_bleu_buckets(scores1, bucket_edges)
+    buckets2 = get_bleu_buckets(scores2, bucket_edges)
+
+    rows = []
+    for label in buckets1:
+        count1 = len(buckets1[label])
+        count2 = len(buckets2[label])
+        rows.append((label, count1, count2, count1 - count2))
+
+    df = pd.DataFrame(rows, columns=["BLEU-bucket", "Aantal sys1", "Aantal sys2", "Verschil (sys1 - sys2)"])
+    return df
