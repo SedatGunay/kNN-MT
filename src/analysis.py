@@ -4,6 +4,7 @@ import pandas as pd
 import re
 import os
 from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
 
 def compute_pos_distribution(tokenized_sentences):
     """Compute frequency distribution of POS tags."""
@@ -71,12 +72,12 @@ def extract_pos_tag_scores(index_html_path):
         label_cell = row.find("th")
         if label_cell and len(cols) >= 2:
             label = label_cell.get_text(strip=True)
-            val1 = extract_float(cols[1])  # kNN (sys2)
-            val2 = extract_float(cols[0])  # Vanilla (sys1)
+            val1 = extract_float(cols[0])  # kNN (sys1)
+            val2 = extract_float(cols[1])  # Vanilla (sys2)
             if val1 is not None and val2 is not None:
                 labels.append(label)
-                sys1_scores.append(val2)
-                sys2_scores.append(val1)
+                sys1_scores.append(val1)
+                sys2_scores.append(val2)
     
     df_pos = pd.DataFrame({
     "Label": labels,
@@ -139,5 +140,13 @@ def extract_freq_bucket_scores(index_html_path):
         "Vanilla (sys2)": sys2_scores
     })
     df_freq["Verschil (sys1 - sys2)"] = df_freq["kNN-MT (sys1)"] - df_freq["Vanilla (sys2)"]
+
+    df_freq.set_index("Frequentie Bucket")[["kNN-MT (sys1)", "Vanilla (sys2)"]].plot(kind="bar", figsize=(10,5))
+    plt.title("Word Accuracy per Frequentie Bucket")
+    plt.ylabel("F1-score")
+    plt.xticks(rotation=45)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
     return df_freq
