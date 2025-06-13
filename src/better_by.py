@@ -47,8 +47,8 @@ def extract_entities(sentences, lang="en"):
 def plot_distribution(labels, knn_freqs, van_freqs, title, ylabel):
     x = range(len(labels))
     plt.figure(figsize=(12, 6))
-    plt.bar(x, knn_freqs, width=0.4, label="kNN beter", align='center', color='green')
-    plt.bar([i + 0.4 for i in x], van_freqs, width=0.4, label="Vanilla beter", align='center', color='red')
+    plt.bar(x, knn_freqs, width=0.4, label="kNN better", align='center', color='green')
+    plt.bar([i + 0.4 for i in x], van_freqs, width=0.4, label="Vanilla better", align='center', color='red')
     plt.xticks([i + 0.2 for i in x], labels, rotation=45)
     plt.ylabel(ylabel)
     plt.title(title)
