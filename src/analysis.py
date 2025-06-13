@@ -172,15 +172,18 @@ def get_bleu_buckets(scores, edges):
     """
     buckets = {}
     edges = [0.0] + edges + [100.0]
+
+    # make empty buckets based on edges
     for low, high in zip(edges[:-1], edges[1:]):
         label = f"[{low},{high})" if high < 100 else f">={low}"
         buckets[label] = []
 
+    # append score to corrresponding bucket
     for score in scores:
         for low, high in zip(edges[:-1], edges[1:]):
-            if low <= score < high:
+            if low <= score < high:     # get interval for score
                 label = f"[{low},{high})" if high < 100 else f">={low}"
-                buckets[label].append(score)
+                buckets[label].append(score)    # append score to bucket
                 break
 
     return buckets
