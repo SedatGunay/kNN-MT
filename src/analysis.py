@@ -158,7 +158,7 @@ def load_file(path):
 
 def bleu_per_sentence(refs, hyps):
     """
-    Calculates sentence-level BLEU scores for each hypothesis–reference pair.
+    Calculates sentence-level BLEU scores for each hypothesis–reference pair using sacrebleu.
     """
     return [sentence_bleu(hyp, [ref]).score for ref, hyp in zip(refs, hyps)]
 
