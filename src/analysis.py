@@ -213,5 +213,5 @@ def compare_bleu_buckets(refs, sys1, sys2, bucket_edges):
         count2 = len(buckets2[label])
         rows.append((label, count1, count2, count1 - count2))
 
-    df = pd.DataFrame(rows, columns=["BLEU-bucket", "Aantal sys1", "Aantal sys2", "Verschil (sys1 - sys2)"])
+    df = pd.DataFrame(rows, columns=["BLEU-bucket", "Aantal sys1 - kNN-MT", "Aantal sys2 - Vanilla", "Verschil (sys1 - sys2)"])
     return df

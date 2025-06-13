@@ -31,6 +31,12 @@ def write_texts_to_txt(texts, path):
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(texts) + "\n")
 
+def convert_pkl_to_txt(pkl_path, txt_path):
+    data = load_pickle(pkl_path)
+    with open(txt_path, "w", encoding="utf-8") as f:
+        for line in data:
+            f.write(line.strip() + "\n")
+
 def load_dataset_structure(dataset_path, splits, modes, types):
     """
     Load structured dataset contents from a given path.
