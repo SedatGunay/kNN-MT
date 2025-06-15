@@ -1,5 +1,5 @@
 from collections import Counter
-# from jiwer import compute_measures
+from jiwer import compute_measures
 import pandas as pd
 import re
 import os
@@ -10,14 +10,6 @@ from sacrebleu import sentence_bleu
 def compute_pos_distribution(tokenized_sentences):
     """Compute frequency distribution of POS tags."""
     return Counter(tag for sentence in tokenized_sentences for (_, tag) in sentence)
-
-def calculate_wer(refs, hyps):
-    """
-    refs: list of reference strings
-    hyps: list of hypothesis strings
-    returns: dict of WER components
-    """
-    return compute_measures(refs, hyps)
 
 def segment_sentences_by_length(sentences, boundaries):
     """
@@ -215,3 +207,29 @@ def compare_bleu_buckets(refs, sys1, sys2, bucket_edges):
 
     df = pd.DataFrame(rows, columns=["BLEU-bucket", "Aantal sys1 - kNN-MT", "Aantal sys2 - Vanilla", "Verschil (sys1 - sys2)"])
     return df
+
+
+### WER ANALYSIS
+from jiwer import compute_measures
+import pandas as pd
+
+def calculate_wer_per_sentence(refs, hyps):
+    """
+    Compute WER with jiwer
+    Returns a list with dicts per sentence
+    """
+    return [compute_measures([ref], [hyp]) for ref, hyp in zip(refs, hyps)]
+
+def get_wer_outliers(refs, hyps, threshold= 0.5):
+    """
+    Filters sentences with  WER > threshold
+    """
+    wer_scores = [compute_measures([r], [h])["wer"] for r, h in zip(refs, hyps)]
+    outliers = [(i, r, h, wer) for i, (r, h, wer) in enumerate(zip(refs, hyps, wer_scores)) if wer > threshold]
+    return outliers
+
+def wer_summary(refs, hyps):
+    """
+    Mean scores over sentences
+    """
+    return compute_measures(refs, hyps)
