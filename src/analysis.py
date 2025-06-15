@@ -220,12 +220,49 @@ def calculate_wer_per_sentence(refs, hyps):
     """
     return [compute_measures([ref], [hyp]) for ref, hyp in zip(refs, hyps)]
 
-def get_wer_outliers(refs, hyps, threshold= 0.5):
+# def get_knn_gain_outliers(refs, wer_knn, wer_van, threshold=0.5):
+#     """
+#     Select sentences where kNN performs significantly better than vanilla.
+
+#     Parameters:
+#     - refs: List of reference sentences
+#     - wer_knn: List of dicts with WER scores for kNN (with key 'wer')
+#     - wer_van: List of dicts with WER scores for vanilla (with key 'wer')
+#     - threshold: Minimum WER gain (vanilla - kNN)
+
+#     Returns:
+#     - List of tuples (i, ref, wer_van, wer_knn, gain)
+#     """
+#     outliers = []
+#     for i, (r, w_k, w_v) in enumerate(zip(refs, wer_knn, wer_van)):
+#         gain = w_v["wer"] - w_k["wer"]
+#         if gain > threshold:
+#             outliers.append((i, r, w_v["wer"], w_k["wer"], gain))
+#     return outliers
+
+def get_knn_gain_outliers(refs, hyps_knn, hyps_van, threshold=0.5):
     """
-    Filters sentences with  WER > threshold
+    Returns a list of tuples for sentences where kNN outperforms vanilla by more than a threshold.
+
+    Parameters:
+    - refs: list of reference sentences
+    - hyps_knn: list of kNN outputs
+    - hyps_van: list of vanilla outputs
+    - threshold: minimum WER improvement (WER_vanilla - WER_knn)
+
+    Returns:
+    - List of tuples (index, ref, vanilla, knn, wer_van, wer_knn, gain)
     """
-    wer_scores = [compute_measures([r], [h])["wer"] for r, h in zip(refs, hyps)]
-    outliers = [(i, r, h, wer) for i, (r, h, wer) in enumerate(zip(refs, hyps, wer_scores)) if wer > threshold]
+    outliers = []
+
+    for i, (r, h_knn, h_van) in enumerate(zip(refs, hyps_knn, hyps_van)):
+        wer_v = compute_measures([r], [h_van])["wer"]
+        wer_k = compute_measures([r], [h_knn])["wer"]
+        gain = wer_v - wer_k
+
+        if gain > threshold:
+            outliers.append((i, r, h_van, h_knn, wer_v, wer_k, gain))
+
     return outliers
 
 def wer_summary(refs, hyps):
