@@ -28,36 +28,52 @@ def plot_wer_distribution(wer_scores, domain):
     plt.tight_layout()
     plt.show()
 
-
-def plot_knn_gain_scatter(wer_knn, wer_van, outlier_indices, domain=""):
+def plot_knn_gain_scatter(
+    wer_knn, wer_van, gain_indices,
+    title="WER per zin: kNN vs Vanilla",
+    domain_label="",
+    log_scale=False
+):
     """
-    Visualises a scatterplot of WER scores per sentence for kNN and vanilla,
-    where sentences with a significant gain by kNN are highlighted.
+    Plot een scatterplot van WER-scores van vanilla en kNN per zin,
+    met gemarkeerde zinnen waar kNN sterk beter presteert.
 
     Parameters:
-    - wer_knn (List[float]): WER scores per sentence of the kNN system.
-    - wer_of (List[float]): WER scores per sentence of the vanilla system.
-    - gain_indices (List[int]): Indexes of sentences where kNN clearly outperforms.
-    - domain(str): Name of the domain (used in the plot title).
+    - wer_knn: lijst van dicts met WER-resultaten voor kNN (output van calculate_wer_per_sentence)
+    - wer_van: lijst van dicts met WER-resultaten voor vanilla
+    - gain_indices: lijst van indices van zinnen waar kNN sterk beter is
+    - title: string, plot titel
+    - domain_label: string, optioneel label per domein
+    - log_scale: boolean, zet log-log schaal aan als True
     """
+    # WER-scores extraheren
+    x = [d["wer"] for d in wer_van]
+    y = [d["wer"] for d in wer_knn]
+
+    # Index-gebaseerde outliers
+    outlier_x = [x[i] for i in gain_indices]
+    outlier_y = [y[i] for i in gain_indices]
+
+    # Plot
     plt.figure(figsize=(8, 6))
+    plt.scatter(x, y, alpha=0.3, label="Overige zinnen", color="skyblue")
+    plt.scatter(outlier_x, outlier_y, alpha=0.8, color="crimson", label="Top winst kNN")
 
-    # All points 
-    plt.scatter(wer_van, wer_knn, alpha=0.3, label="Overige zinnen", color="skyblue")
+    # Log-schaal (optioneel)
+    if log_scale:
+        plt.xscale("log")
+        plt.yscale("log")
 
-    # Outliers
-    x_out = [wer_van[i] for i in outlier_indices]
-    y_out = [wer_knn[i] for i in outlier_indices]
-    plt.scatter(x_out, y_out, alpha=0.8, color="crimson", label="Top winst kNN")
+    # Referentielijn y = x
+    min_val = min(min(x), min(y))
+    max_val = max(max(x), max(y))
+    plt.plot([min_val, max_val], [min_val, max_val], color='red', linestyle='--', label='y = x')
 
-    # Diagonal
-    plt.plot([0, 1.5], [0, 1.5], linestyle='--', color='red', label='y = x')
-
-    # Labels
+    # Labels en stijl
     plt.xlabel("WER Vanilla")
     plt.ylabel("WER kNN")
-    plt.title(f"WER per sentence: kNN vs Vanilla ({domain})")
+    plt.title(f"{title} ({domain_label})")
     plt.legend()
-    plt.grid(True)
+    plt.grid(True, which="both" if log_scale else "major", ls="--", linewidth=0.5)
     plt.tight_layout()
     plt.show()
