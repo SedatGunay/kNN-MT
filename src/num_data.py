@@ -34,68 +34,71 @@ nlp.max_length = 3_000_000
 # | Original method |
 # *-----------------*
 if METHOD == "original":
-    # Laad originele zinnen
+    # Load original reference sentences
     with open(os.path.join(ROOT, DATASET, "train_ref_texts.pkl"), "rb") as f:
         train_texts = pickle.load(f)
     
-    # POS-tag alle zinnen
+    # Apply POS-tagging to all sentences
     docs = list(nlp.pipe(train_texts, disable=["ner", "parser"], batch_size=1000))
 
-    # Bepaal per token of het een 'NUM' is
-    num_token_infos = []  # (zin_index, token_text, token_index_in_zin)
+    # Identify all tokens tagged as 'NUM'
+    num_token_infos = []  # (sentence_index, token_text, token_index_in_sentence)
 
     for i, doc in enumerate(docs):
         for j, token in enumerate(doc):
             if token.pos_ == "NUM":
                 num_token_infos.append((i, token.text, j))
 
-    print("Aantal NUM-tokens gevonden:", len(num_token_infos))
-    print("Voorbeelden:", num_token_infos[:5])
+    print("Number of NUM tokens found:", len(num_token_infos))
+    print("Examples:", num_token_infos[:5])
 
     for i in random.sample(num_token_infos, 5):
-        zin_index, token_text, token_pos_in_zin = i
-        print(f"\n Zin #{zin_index}")
-        print("Zin:", train_texts[zin_index])
-        print("Gevonden NUM-token:", token_text)
-        print("Volledige POS-tagging:")
-        print([f"{tok.text} ({tok.pos_})" for tok in docs[zin_index]])
+        sentence_index, token_text, token_pos_in_sentence = i
+        print(f"\n Sentence #{sentence_index}")
+        print("Sentence:", train_texts[sentence_index])
+        print("Identified NUM token:", token_text)
+        print("Full POS-tagging:")
+        print([f"{tok.text} ({tok.pos_})" for tok in docs[sentence_index]])
 
+    # Count frequency of NUM tokens
     num_token_words = [t[1] for t in num_token_infos]
     counter = Counter(num_token_words)
 
-    print("\nTop 20 meest voorkomende NUM-tokens:")
+    print("\nTop 20 most frequent NUM tokens:")
     for token, count in counter.most_common(20):
         print(f"{token}: {count}")
 
+    # Load tokenized versions of the reference sentences
     with open(os.path.join(ROOT, DATASET, "train_ref_tokens_texts.pkl"), "rb") as f:
         token_texts = pickle.load(f)
 
-    # Controleer structuur
-    print("Aantal zinnen:", len(token_texts))
-    print("Type van eerste item:", type(token_texts[0]))
+    # Sanity check
+    print("Number of sentences:", len(token_texts))
+    print("Type of first item:", type(token_texts[0]))
 
-    num_indices = []  # globale indices voor NUM-posities
+    num_indices = []  # global indices of NUM positions
     global_index = 0
 
-    for i, tokens in enumerate(token_texts):  # per zin
+    for i, tokens in enumerate(token_texts):  # sentence by sentence
         num_positions = [info[2] for info in num_token_infos if info[0] == i]
 
-        # check per token of het een NUM-token is
+        # Check each token's position in the sentence
         for local_idx, token in enumerate(tokens):
             if local_idx in num_positions:
                 num_indices.append(global_index + local_idx)
         global_index += len(tokens)
 
-    print("Aantal gevonden NUM-indices:", len(num_indices))
+    print("Number of global NUM indices found:", len(num_indices))
 
-    print("Shape van keys:", keys.shape)
-    print("Aantal vals:", len(vals))
+    print("Shape of keys:", keys.shape)
+    print("Number of vals:", len(vals))
 
+    # Filter the keys and values by NUM indices
     num_keys = keys[num_indices]  # torch tensor
     num_vals = [vals[i] for i in num_indices]
     num_token_ids = [flat_token_ids[i] for i in num_indices]
 
-    print("Tokens extracted:")
+    print("Sample of decoded tokens:")
     print([tokenizer.decode(tok) for tok in num_vals[:20]])
 
 # *-----------------*
