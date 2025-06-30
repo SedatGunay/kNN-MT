@@ -270,3 +270,39 @@ def wer_summary(refs, hyps):
     Mean scores over sentences
     """
     return compute_measures(refs, hyps)
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def analyze_bleu_buckets_single_system(score_file, bucket_size=10, system_name="kNN-MT"):
+    """
+    Analyseer BLEU-scoreverdeling over buckets voor één systeem.
+    
+    Parameters:
+    - score_file: pad naar .res_bleu bestand (één BLEU-score per regel)
+    - bucket_size: grootte van de BLEU-buckets (default: 10)
+    - system_name: label voor de plot (default: 'kNN-MT')
+    """
+    # Laad scores
+    with open(score_file, "r", encoding="utf-8") as f:
+        scores = [float(line.strip()) for line in f if line.strip()]
+    
+    max_score = 100  # BLEU-score wordt op schaal 0-100 gerapporteerd
+    bins = list(range(0, max_score + bucket_size, bucket_size))
+    labels = [f"{i}-{i+bucket_size}" for i in bins[:-1]]
+    
+    # Histogram
+    counts, _ = np.histogram(scores, bins=bins)
+
+    # Plot
+    plt.figure(figsize=(10, 5))
+    plt.bar(labels, counts, width=0.8)
+    plt.title(f"BLEU score distributie per bucket ({system_name})")
+    plt.xlabel("BLEU bucket")
+    plt.ylabel("Aantal zinnen")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+    return dict(zip(labels, counts))
