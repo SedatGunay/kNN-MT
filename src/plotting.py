@@ -30,7 +30,7 @@ def plot_wer_distribution(wer_scores, domain):
 
 def plot_knn_gain_scatter(
     wer_knn, wer_van, gain_indices,
-    title="WER per zin: kNN vs Vanilla",
+    title="WER per sentence: kNN vs Vanilla",
     domain_label="",
     log_scale=False
 ):
@@ -56,8 +56,8 @@ def plot_knn_gain_scatter(
 
     # Plot
     plt.figure(figsize=(8, 6))
-    plt.scatter(x, y, alpha=0.3, label="Overige zinnen", color="skyblue")
-    plt.scatter(outlier_x, outlier_y, alpha=0.8, color="crimson", label="Top winst kNN")
+    plt.scatter(x, y, alpha=0.3, label="Other sentences", color="skyblue")
+    plt.scatter(outlier_x, outlier_y, alpha=0.8, color="crimson", label="Top gain kNN")
 
     # Log-schaal (optioneel)
     if log_scale:

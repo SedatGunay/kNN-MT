@@ -44,15 +44,35 @@ def extract_entities(sentences, lang="en"):
     return entity_counts
 
 
+# def plot_distribution(labels, knn_freqs, van_freqs, title, ylabel):
+#     x = range(len(labels))
+#     plt.figure(figsize=(12, 6))
+#     plt.bar(x, knn_freqs, width=0.4, label="kNN better", align='center', color='green')
+#     plt.bar([i + 0.4 for i in x], van_freqs, width=0.4, label="Vanilla better", align='center', color='red')
+#     plt.xticks([i + 0.2 for i in x], labels, rotation=45)
+#     plt.ylabel(ylabel)
+#     plt.title(title)
+#     plt.legend()
+#     plt.grid(True, axis="y")
+#     plt.tight_layout()
+#     plt.show()
+
+import matplotlib.pyplot as plt
+
 def plot_distribution(labels, knn_freqs, van_freqs, title, ylabel):
     x = range(len(labels))
+    width = 0.4
+
     plt.figure(figsize=(12, 6))
-    plt.bar(x, knn_freqs, width=0.4, label="kNN better", align='center', color='green')
-    plt.bar([i + 0.4 for i in x], van_freqs, width=0.4, label="Vanilla better", align='center', color='red')
-    plt.xticks([i + 0.2 for i in x], labels, rotation=45)
+    
+    # Gebruik scriptievriendelijke kleuren (blauw en oranje)
+    plt.bar([i - width/2 for i in x], knn_freqs, width=width, label="kNN better", color="#1f77b4")
+    plt.bar([i + width/2 for i in x], van_freqs, width=width, label="Vanilla better", color="#ff7f0e")
+
+    plt.xticks(ticks=x, labels=labels, rotation=45, ha="right")
     plt.ylabel(ylabel)
     plt.title(title)
     plt.legend()
-    plt.grid(True, axis="y")
+    plt.grid(True, axis="y", linestyle="--", alpha=0.7)
     plt.tight_layout()
     plt.show()
