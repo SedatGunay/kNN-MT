@@ -57,7 +57,7 @@ def extract_entities(sentences, lang="en"):
 #     plt.tight_layout()
 #     plt.show()
 
-import matplotlib.pyplot as plt
+
 
 def plot_distribution(labels, knn_freqs, van_freqs, title, ylabel):
     x = range(len(labels))
@@ -65,7 +65,7 @@ def plot_distribution(labels, knn_freqs, van_freqs, title, ylabel):
 
     plt.figure(figsize=(12, 6))
     
-    # Gebruik scriptievriendelijke kleuren (blauw en oranje)
+
     plt.bar([i - width/2 for i in x], knn_freqs, width=width, label="kNN better", color="#1f77b4")
     plt.bar([i + width/2 for i in x], van_freqs, width=width, label="Vanilla better", color="#ff7f0e")
 
