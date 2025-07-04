@@ -4,6 +4,19 @@ import os
 import spacy
 from collections import Counter
 
+def load_file(path):
+    """
+    Load a text file and return a list of non-empty stripped lines.
+
+    Parameters:
+        path (str): Path to the text file.
+
+    Returns:
+        List[str]: Lines in the file with leading/trailing whitespace removed.
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        return [line.strip() for line in f if line.strip()]
+    
 def normalize_text(text):
     """Lowercase and strip whitespace."""
     return text.lower().strip()
